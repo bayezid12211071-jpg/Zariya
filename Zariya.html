@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zariya's Study Matrix | Phases 1-3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #090a0f;
+            --bangla: #ff007f;
+            --science: #00f3ff;
+            --bgs: #ffaa00;
+            --islam: #00ff66;
+            --english: #b700ff;
+            --math: #ffea00;
+            --neon-blue: #00f3ff;
+            --neon-red: #ff3366;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: radial-gradient(circle at top left, #1b1236, var(--bg-dark));
+            background-attachment: fixed;
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            padding: 30px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1500px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+            flex-grow: 1;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-undo:hover:not(:disabled) {
+            background: rgba(0, 243, 255, 0.1);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+            color: var(--neon-blue);
+        }
+
+        .btn-reset:hover {
+            background: rgba(255, 51, 102, 0.1);
+            border-color: var(--neon-red);
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.4);
+            color: var(--neon-red);
+        }
+
+        .btn-action:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .phase-header {
+            width: 100%;
+            max-width: 1500px;
+            margin: 40px 0 20px;
+        }
+
+        .phase-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .phase-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .phase-title span {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+
+        .progress-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00f3ff, #b700ff);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.8);
+            border-radius: 10px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Adjusted to 5 columns for nice 10-day symmetry */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            max-width: 1500px;
+            width: 100%;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 15px;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 170px;
+        }
+
+        .card[data-subject="bangla"] { border-top: 3px solid var(--bangla); box-shadow: 0 5px 15px -5px rgba(255, 0, 127, 0.2); }
+        .card[data-subject="bangla"]:hover { box-shadow: 0 0 25px rgba(255, 0, 127, 0.5); transform: translateY(-5px); }
+        
+        .card[data-subject="science"] { border-top: 3px solid var(--science); box-shadow: 0 5px 15px -5px rgba(0, 243, 255, 0.2); }
+        .card[data-subject="science"]:hover { box-shadow: 0 0 25px rgba(0, 243, 255, 0.5); transform: translateY(-5px); }
+
+        .card[data-subject="bgs"] { border-top: 3px solid var(--bgs); box-shadow: 0 5px 15px -5px rgba(255, 170, 0, 0.2); }
+        .card[data-subject="bgs"]:hover { box-shadow: 0 0 25px rgba(255, 170, 0, 0.5); transform: translateY(-5px); }
+
+        .card[data-subject="islam"] { border-top: 3px solid var(--islam); box-shadow: 0 5px 15px -5px rgba(0, 255, 102, 0.2); }
+        .card[data-subject="islam"]:hover { box-shadow: 0 0 25px rgba(0, 255, 102, 0.5); transform: translateY(-5px); }
+
+        .card[data-subject="english"] { border-top: 3px solid var(--english); box-shadow: 0 5px 15px -5px rgba(183, 0, 255, 0.2); }
+        .card[data-subject="english"]:hover { box-shadow: 0 0 25px rgba(183, 0, 255, 0.5); transform: translateY(-5px); }
+
+        .card[data-subject="math"] { border-top: 3px solid var(--math); box-shadow: 0 5px 15px -5px rgba(255, 234, 0, 0.2); }
+        .card[data-subject="math"]:hover { box-shadow: 0 0 25px rgba(255, 234, 0, 0.5); transform: translateY(-5px); }
+
+        .date { font-weight: 800; font-size: 0.85rem; margin-bottom: 5px; letter-spacing: 0.5px; color: rgba(255,255,255,0.5); }
+        .subject { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; line-height: 1.2; color: #fff; }
+        .topic { font-size: 0.85rem; color: #a0a5b5; line-height: 1.4; margin-bottom: 15px; word-wrap: break-word; }
+
+        .check-wrap { display: flex; align-items: center; gap: 8px; cursor: pointer; margin-top: auto; }
+        .check-wrap input { display: none; }
+        .custom-checkbox { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.5); border-radius: 4px; position: relative; transition: all 0.2s; }
+        .check-wrap:hover .custom-checkbox { border-color: #fff; }
+        
+        .check-wrap input:checked + .custom-checkbox { background: #fff; border-color: #fff; }
+        .check-wrap input:checked + .custom-checkbox::after {
+            content: '✔'; position: absolute; color: #000; font-size: 12px; font-weight: bold;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
+
+        .check-text { font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 0.5px; text-transform: uppercase; font-size: 0.7rem; }
+        .check-wrap input:checked ~ .check-text { color: #fff; text-decoration: line-through; }
+
+        .card.done { opacity: 0.4; transform: scale(0.98); filter: grayscale(0.6); box-shadow: none !important; }
+
+        @media (max-width: 1200px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px) { .grid { grid-template-columns: 1fr; } .action-buttons { width: 100%; justify-content: space-between; } }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <h1>Study Matrix</h1>
+        <div class="action-buttons">
+            <button id="undoBtn" class="btn-action btn-undo" onclick="undoLast()" disabled>
+                <span>⟲</span> Undo Last
+            </button>
+            <button class="btn-action btn-reset" onclick="resetProgress()">
+                <span>✖</span> Reset All
+            </button>
+        </div>
+    </div>
+
+    <div class="phase-header">
+        <div class="phase-title-row">
+            <div class="phase-title">Phase <span>01</span></div>
+            <div class="progress-text" id="text-1">0 / 10 Completed</div>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="bar-1"></div>
+        </div>
+    </div>
+    <div class="grid" id="phase1-grid"></div>
+
+    <div class="phase-header">
+        <div class="phase-title-row">
+            <div class="phase-title">Phase <span>02</span></div>
+            <div class="progress-text" id="text-2">0 / 10 Completed</div>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="bar-2"></div>
+        </div>
+    </div>
+    <div class="grid" id="phase2-grid"></div>
+
+    <div class="phase-header">
+        <div class="phase-title-row">
+            <div class="phase-title">Phase <span>03</span></div>
+            <div class="progress-text" id="text-3">0 / 10 Completed</div>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="bar-3"></div>
+        </div>
+    </div>
+    <div class="grid" id="phase3-grid"></div>
+
+    <script>
+        const phase1 = [
+            { d: "Day 01", s: "Bangla & Physics", t: "গল্প – 1, Phy-2", class: "science" },
+            { d: "Day 02", s: "Bangla & Chemistry", t: "কবিতা - 2, Che-2", class: "science" },
+            { d: "Day 03", s: "Bangla & Biology", t: "বহিপীর, Bio-3", class: "science" },
+            { d: "Day 04", s: "English, BGS & Bangla", t: "Unit 10, BGS-5, ভাব – ৭", class: "bgs" },
+            { d: "Day 05", s: "English, Islam & Bangla", t: "Dia 1, Islam 3, রেলগাড়ি", class: "islam" },
+            { d: "Day 06", s: "English, ICT & Bangla", t: "Para 4, ICT - 2, ভাব - ৮", class: "english" },
+            { d: "Day 07", s: "English & Islam", t: "Para 5, Islam-5", class: "islam" },
+            { d: "Day 08", s: "Mathematics", t: "Math 16.1, H.Math 11.2", class: "math" },
+            { d: "Day 09", s: "Mathematics", t: "Math 16.2, H.Math 14", class: "math" },
+            { d: "Day 10", s: "Bangla", t: "ভাব – ৯, সারাংশ ৫,৬, পরিচ্ছেদ 11-15", class: "bangla" }
+        ];
+
+        const phase2 = [
+            { d: "Day 01", s: "Bangla & Physics", t: "গল্প – 2, Phy-4", class: "science" },
+            { d: "Day 02", s: "Bangla & Chemistry", t: "কবিতা - 3, Che-4", class: "science" },
+            { d: "Day 03", s: "Bangla & Biology", t: "1971, Bio-4", class: "science" },
+            { d: "Day 04", s: "English, BGS & Bangla", t: "Unit 11, BGS-6, ভাব  ১০", class: "bgs" },
+            { d: "Day 05", s: "English, Islam & Bangla", t: "Dia 2, Islam 1, জাদুঘর", class: "islam" },
+            { d: "Day 06", s: "English, ICT & Bangla", t: "Para 7, ICT - 3, ভাব – ১১", class: "english" },
+            { d: "Day 07", s: "English & Bangla", t: "Para 8, পদ্মা সেতু, ভাব - ১২", class: "bangla" },
+            { d: "Day 08", s: "Mathematics", t: "Math 9.1, H.Math 8.1", class: "math" },
+            { d: "Day 09", s: "Mathematics", t: "Math 9.2, H.Math 8.2", class: "math" },
+            { d: "Day 10", s: "Bangla", t: "সারাংশ 7,8, পরিচ্ছেদ 16-19", class: "bangla" }
+        ];
+
+        const phase3 = [
+            { d: "Day 01", s: "Bangla & Physics", t: "গল্প – 3, Phy-5", class: "science" },
+            { d: "Day 02", s: "Bangla & Chemistry", t: "কবিতা - 4, Che-5", class: "science" },
+            { d: "Day 03", s: "Bangla & Biology", t: "গল্প 4, Bio-5", class: "science" },
+            { d: "Day 04", s: "English & BGS", t: "Unit 13, BGS-9", class: "bgs" },
+            { d: "Day 05", s: "English & Islam", t: "Dia 4, Islam 2", class: "islam" },
+            { d: "Day 06", s: "Bangla & Islam", t: "কবিতা - 5, Islam 4", class: "islam" },
+            { d: "Day 07", s: "BGS", t: "BGS-11", class: "bgs" },
+            { d: "Day 08", s: "Mathematics", t: "Math 6.1, H.Math 3.1", class: "math" },
+            { d: "Day 09", s: "Mathematics", t: "Math 2, H.Math 10", class: "math" },
+            { d: "Day 10", s: "BGS & Bangla", t: "BGS-13, পরিচ্ছেদ 40-43, 20", class: "bangla" }
+        ];
+
+        let actionHistory = [];
+        const STORAGE_KEY = 'yushaMatrixPhases2026'; // New dedicated key
+
+        function renderGrid(data, containerId, phaseNum) {
+            const grid = document.getElementById(containerId);
+            grid.innerHTML = ''; // Clear prior renders if necessary
+            data.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.setAttribute('data-subject', item.class);
+                
+                const cbId = `cb-p${phaseNum}-${index}`;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="date">${item.d}</div>
+                        <div class="subject">${item.s}</div>
+                        <div class="topic">${item.t}</div>
+                    </div>
+                    <label class="check-wrap">
+                        <input type="checkbox" id="${cbId}" data-phase="${phaseNum}" onchange="handleToggle(this)">
+                        <div class="custom-checkbox"></div>
+                        <span class="check-text">Done</span>
+                    </label>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Setup Local Storage Saving
+        function saveProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const progressData = {};
+            checkboxes.forEach(cb => {
+                progressData[cb.id] = cb.checked;
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progressData));
+        }
+
+        // Setup Local Storage Loading
+        function loadProgress() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                const progressData = JSON.parse(savedData);
+                for (const id in progressData) {
+                    const cb = document.getElementById(id);
+                    if (cb) {
+                        cb.checked = progressData[id];
+                        const card = cb.closest('.card');
+                        if (cb.checked) {
+                            card.classList.add('done');
+                        } else {
+                            card.classList.remove('done');
+                        }
+                    }
+                }
+            }
+        }
+
+        function handleToggle(checkbox, isUndo = false) {
+            const card = checkbox.closest('.card');
+            const phaseNum = checkbox.getAttribute('data-phase');
+            
+            if (!isUndo) {
+                actionHistory.push({
+                    checkboxId: checkbox.id,
+                    previousState: !checkbox.checked 
+                });
+                document.getElementById('undoBtn').disabled = false;
+            }
+
+            if (checkbox.checked) {
+                card.classList.add('done');
+            } else {
+                card.classList.remove('done');
+            }
+
+            updateProgress(phaseNum);
+            saveProgress();
+        }
+
+        function updateProgress(phaseNum) {
+            const grid = document.getElementById(`phase${phaseNum}-grid`);
+            const checkboxes = grid.querySelectorAll('input[type="checkbox"]');
+            const total = checkboxes.length;
+            const checked = grid.querySelectorAll('input[type="checkbox"]:checked').length;
+            
+            const percentage = (checked / total) * 100;
+            
+            document.getElementById(`bar-${phaseNum}`).style.width = `${percentage}%`;
+            document.getElementById(`text-${phaseNum}`).innerText = `${checked} / ${total} Completed`;
+        }
+
+        function undoLast() {
+            if (actionHistory.length === 0) return;
+
+            const lastAction = actionHistory.pop();
+            const checkbox = document.getElementById(lastAction.checkboxId);
+            
+            checkbox.checked = lastAction.previousState;
+            
+            handleToggle(checkbox, true);
+
+            if (actionHistory.length === 0) {
+                document.getElementById('undoBtn').disabled = true;
+            }
+        }
+
+        function resetProgress() {
+            if(confirm("Are you sure you want to clear all your progress?")) {
+                localStorage.removeItem(STORAGE_KEY);
+                actionHistory = [];
+                document.getElementById('undoBtn').disabled = true;
+                
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.card').classList.remove('done');
+                });
+
+                updateProgress(1);
+                updateProgress(2);
+                updateProgress(3);
+            }
+        }
+
+        // Initialize the App
+        function initApp() {
+            renderGrid(phase1, 'phase1-grid', 1);
+            renderGrid(phase2, 'phase2-grid', 2);
+            renderGrid(phase3, 'phase3-grid', 3);
+            
+            loadProgress(); 
+            
+            updateProgress(1);
+            updateProgress(2);
+            updateProgress(3);
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
